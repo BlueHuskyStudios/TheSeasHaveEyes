@@ -2,7 +2,12 @@ fileFormatVersion: 2
 guid: e594ff7358075cc499aa20f5ef8cae51
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - blackPixelTex: {fileID: 2800000, guid: c132f27d4d5ba50499a6f11338995db4, type: 3}
+  - airPixelTex: {fileID: 2800000, guid: 090b9ed1e05ea2c41afcb1343dca56c2, type: 3}
+  - healthPixelTex: {fileID: 2800000, guid: 374ae6418f0db46488a51c1eaef54e4b, type: 3}
+  - staminaPixelTex: {fileID: 2800000, guid: 1d2adaca862ea7048bd69fb05838ba6e, type: 3}
+  - weaponPixelTex: {fileID: 2800000, guid: c8fc1a62b0561e94f847688fab9dec9c, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
