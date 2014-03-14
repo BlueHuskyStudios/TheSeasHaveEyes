@@ -45,7 +45,10 @@ public class PlayerController : MonoBehaviour
     public float gamepadRightVerticalOffset;
     public float gamepadTriggerOffset;
 
-    //--START OF EVENT METHODS
+	//Declare delegates and events.
+	public static event System.Action<float> AddAirEvent; // - Moore
+
+    //--START OF UNITY EVENT METHODS
 
     // Use this for initialization
     void Start()
@@ -53,6 +56,10 @@ public class PlayerController : MonoBehaviour
         health = healthMax;
         stamina = staminaMax;
         air = airMax;
+
+		//And setting up event listener thingies here.
+		PickupBubble.CollidedWithPlayer += AddAir;
+		PickupBubble.CollidedWithPlayer += AddScore;
 	
     }
 	
@@ -109,6 +116,11 @@ public class PlayerController : MonoBehaviour
     void OnGUI()
     {
         DrawHUD();
+		//gameObject.GetComponent<3DText>(); //Deleteme?
+
+		GUI.Label(new Rect(0, 0, 100, 100), "Score: " + score.ToString());
+
+
     }
 
     /*
@@ -120,7 +132,13 @@ public class PlayerController : MonoBehaviour
 	}
 	*/
 
-    //--END OF EVENT METHODS.
+	//--END OF UNITY EVENT METHODS.
+
+
+	//--START OF USER EVENT METHODS.
+
+
+	//--END OF USER EVENT METHODS.
 
     void DrawHUD()
     {
