@@ -9,8 +9,9 @@ public class PlayerController : MonoBehaviour
 
     //--Constants and other variables that shouldn't be changed during runtime in the final product.
     public float movespeed; //This is set in the inspector to determine the forward-movement speed of the character. - Moore
-
-
+	public float strokeDelayScalar;
+	public AudioSource swimSoundPlayer;
+	public AudioClip swimSound;
 
     //Change these to change the colors of the drawn status bars.
     public Texture2D blackPixelTex;
@@ -45,6 +46,9 @@ public class PlayerController : MonoBehaviour
     public float gamepadRightVerticalOffset;
     public float gamepadTriggerOffset;
 
+	public float strokeCooldown; //This is used to track if the player's able to give another 'stroke' in the direction they're facing. - Moore
+	public float timeBetweenStrokes; //Ideally, this would be a const, but is public to allow tweaking in the inspector. This is the cooldown is set to each stroke. - Moore
+
 	//Declare delegates and events.
 	public static event System.Action<float> AddAirEvent; // - Moore
 
@@ -60,12 +64,16 @@ public class PlayerController : MonoBehaviour
 		//And setting up event listener thingies here.
 		PickupBubble.CollidedWithPlayer += AddAir;
 		PickupBubble.CollidedWithPlayer += AddScore;
+
+		timeBetweenStrokes = 1.0f;
+		strokeDelayScalar = timeBetweenStrokes * 15;
 	
     }
 	
     // FixedUpdate is called once per frame
     void FixedUpdate()
     {
+		strokeCooldown -= Time.fixedDeltaTime;
 
         HandlePlayerInput();
 
@@ -192,30 +200,41 @@ public class PlayerController : MonoBehaviour
 		
         gamepadRightHorizontalOffset = Input.GetAxis("RightHorizontal");
         gamepadRightVerticalOffset = Input.GetAxis("RightVertical");
-		
-        gamepadTriggerOffset = Input.GetAxis("Trigger");
-        if (gamepadTriggerOffset >= 0)
-        {
-            movementBoostScalar = (20.0f * gamepadTriggerOffset); //Makes the modifier range from 0.0 to 20.0 assuming the trigger is fully depressed. - Moore
-        } else
-        {
-            movementBoostScalar = (-20.0f * gamepadTriggerOffset / 2.0f); //Lower range is from -10.0 to 0.0. Because it's additive, if the player isn't moving, the player will move backwards. We can fix this later. - Moore
-        }
 
-        //destination = transform.forward * movespeed;
-        rigidbody.AddForce((transform.forward * movespeed * gamepadLeftVerticalOffset * (movementScalar + movementBoostScalar)));
-        rigidbody.AddForce((transform.right * movespeed / 2 * gamepadLeftHorizontalOffset * (movementScalar + movementBoostScalar)));
+		if (CanStroke())
+		{
+			bool didStroke = false;
+	        gamepadTriggerOffset = Input.GetAxis("Trigger");
+	        if (gamepadTriggerOffset >= 0)
+	        {
+	            movementBoostScalar = (20.0f * gamepadTriggerOffset); //Makes the modifier range from 0.0 to 20.0 assuming the trigger is fully depressed. - Moore
+	        } else
+	        {
+	            movementBoostScalar = (-20.0f * gamepadTriggerOffset / 2.0f); //Lower range is from -10.0 to 0.0. Because it's additive, if the player isn't moving, the player will move backwards. We can fix this later. - Moore
+	        }
 
-        //transform.position = Vector3.MoveTowards(transform.position, transform.position + (transform.forward * movespeed * Input.GetAxis("Vertical")), movespeed); //Moves forward based on the vertical axis (Joystick left stick or Keyboard WS keys). - Moore
-        //transform.position = Vector3.MoveTowards(transform.position, transform.position + (transform.right * movespeed / 2 * Input.GetAxis("Horizontal")), movespeed / 2); //Horizontal speed is half of forward movespeed.
-        //The two above commands work, but they work around the physics system. They're good if we're using an object that doesn't need rigid bodies, but isn't going to work as well for TSHE. - Moore
+	        //destination = transform.forward * movespeed;
+	        rigidbody.AddForce((transform.forward * movespeed * gamepadLeftVerticalOffset * (movementScalar + movementBoostScalar) * strokeDelayScalar));
+			rigidbody.AddForce((transform.right * movespeed / 2 * gamepadLeftHorizontalOffset * (movementScalar + movementBoostScalar) * strokeDelayScalar));
 
-        //if (Input.GetButton("Jump")) {transform.position = Vector3.MoveTowards(transform.position, transform.position + (transform.up * movespeed / 2), movespeed / 2);} //Vertical speed is also halved. | Another older version that ignored rigidbody physics.
+			if (gamepadLeftVerticalOffset != 0 || gamepadLeftHorizontalOffset != 0) {didStroke = true;}
 
-        if (Input.GetButton("Jump"))
-        {
-            rigidbody.AddForce((transform.up * movespeed * (movementScalar + movementBoostScalar)));
-        }
+	        //transform.position = Vector3.MoveTowards(transform.position, transform.position + (transform.forward * movespeed * Input.GetAxis("Vertical")), movespeed); //Moves forward based on the vertical axis (Joystick left stick or Keyboard WS keys). - Moore
+	        //transform.position = Vector3.MoveTowards(transform.position, transform.position + (transform.right * movespeed / 2 * Input.GetAxis("Horizontal")), movespeed / 2); //Horizontal speed is half of forward movespeed.
+	        //The two above commands work, but they work around the physics system. They're good if we're using an object that doesn't need rigid bodies, but isn't going to work as well for TSHE. - Moore
+
+	        //if (Input.GetButton("Jump")) {transform.position = Vector3.MoveTowards(transform.position, transform.position + (transform.up * movespeed / 2), movespeed / 2);} //Vertical speed is also halved. | Another older version that ignored rigidbody physics.
+
+	        if (Input.GetButton("Jump"))
+	        {
+				rigidbody.AddForce((transform.up * movespeed * (movementScalar + movementBoostScalar)  * strokeDelayScalar));
+				didStroke = true;
+	        }
+
+			if (didStroke) {ResetStrokeCooldown();}
+		}
+
+		//TODO: Allow the player to attack. This doesn't matter if the player has used a stroke or not.
     }
 
     public void AddAir(float amount)
@@ -237,4 +256,20 @@ public class PlayerController : MonoBehaviour
     {
         score += amount;
     }
+
+	protected bool CanStroke()
+	{
+		bool result = false;
+		if (strokeCooldown <= 0) {result = true;}
+		return result;
+	}
+
+	protected void ResetStrokeCooldown()
+	{
+		if (swimSound != null && swimSoundPlayer != null) 
+		{
+			swimSoundPlayer.PlayOneShot(swimSound, 1);
+		}
+		strokeCooldown = timeBetweenStrokes;
+	}
 }
