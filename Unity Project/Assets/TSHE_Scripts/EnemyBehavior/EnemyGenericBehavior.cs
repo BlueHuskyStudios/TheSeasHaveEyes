@@ -4,7 +4,6 @@ using System.Collections;
 public class EnemyGenericBehavior : MonoBehaviour
 {
 
-    const float DAMAGE = 1;
     public float attackCooldownTime = 0.0f;
 
     // Use this for initialization
@@ -22,6 +21,7 @@ public class EnemyGenericBehavior : MonoBehaviour
         }
     }
 
+    /*
     void OnTriggerEnter(Collider other)
     {
         print("Trigger Entered by: " + other.ToString());
@@ -31,16 +31,12 @@ public class EnemyGenericBehavior : MonoBehaviour
     {
         print("Trigger Stay by: " + other.ToString());
         PlayerController playerController = other.transform.parent.GetComponent<PlayerController>();
-        if (playerController != null && attackCooldownTime <= 0)
-        {
-            playerController.TakeDamage(DAMAGE);
-            attackCooldownTime = 1.0f; //Wait one second before able to attack again.
-        }
     }
 
     void OnTriggerExit(Collider other)
     {
         print("Trigger Left by: " + other.ToString());
     }
+    */
 
 }

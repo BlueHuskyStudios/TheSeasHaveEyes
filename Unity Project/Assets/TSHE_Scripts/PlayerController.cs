@@ -9,9 +9,10 @@ public class PlayerController : MonoBehaviour
 
     //--Constants and other variables that shouldn't be changed during runtime in the final product.
     public float movespeed; //This is set in the inspector to determine the forward-movement speed of the character. - Moore
-	public float strokeDelayScalar;
-	public AudioSource swimSoundPlayer;
-	public AudioClip swimSound;
+    public float maxspeed;
+    public float strokeDelayScalar;
+    public AudioSource swimSoundPlayer;
+    public AudioClip swimSound;
 
     //Change these to change the colors of the drawn status bars.
     public Texture2D blackPixelTex;
@@ -24,19 +25,15 @@ public class PlayerController : MonoBehaviour
     //--Variables that are expected to change a lot during runtime.
     public float healthMax = 100f;
     public float health;
-
     public float staminaMax = 100f;
     public float staminaGainRate = 0.01f;
     public float staminaLossRate = 1f;
     public float staminaBasedAirLossrate = 0.1f;
     public float stamina;
-
     public float airMax = 100f;
     public float airLossRate = 1f; //This 1 means 1 per second. to make it calc by seconds, we'll multiply by 'Time.fixedDeltaTime' - Moore
     public float air;
-
     public float score = 0f;
-
     public float movementScalar = 20f;
     public float movementBoostScalar = 0f; //This scalar and the above scalar are additive. So if both were 20, the total speedboost would be *40, not *400.
 
@@ -45,12 +42,15 @@ public class PlayerController : MonoBehaviour
     public float gamepadRightHorizontalOffset;
     public float gamepadRightVerticalOffset;
     public float gamepadTriggerOffset;
+    public float strokeCooldown; //This is used to track if the player's able to give another 'stroke' in the direction they're facing. - Moore
+    public float timeBetweenStrokes; //Ideally, this would be a const, but is public to allow tweaking in the inspector. This is the cooldown is set to each stroke. - Moore
 
-	public float strokeCooldown; //This is used to track if the player's able to give another 'stroke' in the direction they're facing. - Moore
-	public float timeBetweenStrokes; //Ideally, this would be a const, but is public to allow tweaking in the inspector. This is the cooldown is set to each stroke. - Moore
 
-	//Declare delegates and events.
-	public static event System.Action<float> AddAirEvent; // - Moore
+    //Options and Configuration type thigies.
+    public bool advancedControlStyle = false;
+
+    //Declare delegates and events.
+    public static event System.Action<float> AddAirEvent; // - Moore
     #endregion Declarations
 
     #region Unity Event Methods.
@@ -62,19 +62,19 @@ public class PlayerController : MonoBehaviour
         stamina = staminaMax;
         air = airMax;
 
-		//And setting up event listener thingies here.
-		PickupBubble.CollidedWithPlayer += AddAir;
-		PickupBubble.CollidedWithPlayer += AddScore;
+        //And setting up event listener thingies here.
+        PickupBubble.CollidedWithPlayer += AddAir;
+        PickupBubble.CollidedWithPlayer += AddScore;
 
-		timeBetweenStrokes = 1.0f;
-		strokeDelayScalar = timeBetweenStrokes * 15;
-	
+        timeBetweenStrokes = 1.0f;
+        strokeDelayScalar = timeBetweenStrokes * 15;
+    
     }
-	
+    
     // FixedUpdate is called once per frame
     void FixedUpdate()
     {
-		strokeCooldown -= Time.fixedDeltaTime;
+        strokeCooldown -= Time.fixedDeltaTime;
 
         HandlePlayerInput();
 
@@ -125,9 +125,9 @@ public class PlayerController : MonoBehaviour
     void OnGUI()
     {
         DrawHUD();
-		//gameObject.GetComponent<3DText>(); //Deleteme?
+        //gameObject.GetComponent<3DText>(); //Deleteme?
 
-		GUI.Label(new Rect(0, 0, 100, 100), "Score: " + score.ToString());
+        GUI.Label(new Rect(0, 0, 100, 100), "Score: " + score.ToString());
 
 
     }
@@ -155,10 +155,10 @@ public class PlayerController : MonoBehaviour
 
         float barWidth = widthHeight.x;
         float barHeight = widthHeight.y;
-		
+        
         //GUI.Label(new Rect(barLeft, barTop, barWidth, barHeight), "THE END IS NEVER THE END IS NEVER THE END IS NEVER THE END IS NEVER THE END IS NEVER THE END IS NEVER THE END IS NEVER THE END IS NEVER ");
         //GUI.Label(new Rect(barLeft, barTop, barWidth, barHeight), "", backBarGUIStyle);
-		
+        
         GUI.color = Color.black;
         GUI.DrawTexture(new Rect(barLeft, barTop, barWidth, barHeight), blackPixelTex);
         GUI.color = Color.white;
@@ -166,63 +166,80 @@ public class PlayerController : MonoBehaviour
         GUI.color = Color.white;
     }
 
-
     void HandlePlayerInput()
     {
 
         /* Leggiero - 
-		* Keyboard WASD – Forward, Left strafe, Backward, Right strafe (respectively)
-		* Keyboard Space or Shift – Boost (takes up stamina)
-		* Keyboard Ctrl – Brake
-		* Mouse movement – Pitch, yaw
-		* Mouse left click – Forward - Leggiero.
-		* Mouse right click - Attack? Or is attacking automatic? - Moore
-		*/
+        * Keyboard WASD – Forward, Left strafe, Backward, Right strafe (respectively)
+        * Keyboard Space or Shift – Boost (takes up stamina)
+        * Keyboard Ctrl – Brake
+        * Mouse movement – Pitch, yaw
+        * Mouse left click – Forward - Leggiero.
+        * Mouse right click - Attack? Or is attacking automatic? - Moore
+        */
 
         //Movement Section
 
         gamepadLeftHorizontalOffset = Input.GetAxis("Horizontal");
         gamepadLeftVerticalOffset = Input.GetAxis("Vertical");
-		
+        
         gamepadRightHorizontalOffset = Input.GetAxis("RightHorizontal");
         gamepadRightVerticalOffset = Input.GetAxis("RightVertical");
 
-		if (CanStroke())
-		{
-			bool didStroke = false;
-	        gamepadTriggerOffset = Input.GetAxis("Trigger");
-	        if (gamepadTriggerOffset >= 0)
-	        {
-	            movementBoostScalar = (20.0f * gamepadTriggerOffset); //Makes the modifier range from 0.0 to 20.0 assuming the trigger is fully depressed. - Moore
-	        } else
-	        {
-	            movementBoostScalar = (-20.0f * gamepadTriggerOffset / 2.0f); //Lower range is from -10.0 to 0.0. Because it's additive, if the player isn't moving, the player will move backwards. We can fix this later. - Moore
-	        }
+        if (CanStroke())
+        {
+            bool didStroke = false;
+            gamepadTriggerOffset = Input.GetAxis("Trigger");
+            if (gamepadTriggerOffset >= 0)
+            {
+                movementBoostScalar = (20.0f * gamepadTriggerOffset); //Makes the modifier range from 0.0 to 20.0 assuming the trigger is fully depressed. - Moore
+            } else
+            {
+                movementBoostScalar = (-20.0f * gamepadTriggerOffset / 2.0f); //Lower range is from -10.0 to 0.0. Because it's additive, if the player isn't moving, the player will move backwards. We can fix this later. - Moore
+            }
 
-	        //destination = transform.forward * movespeed;
-            //rigidbody.AddForce(new Vector3(-rigidbody.velocity.x, 0, -rigidbody.velocity.z)); //Cancel out existing forces except for Gravity and whatnot.
-            rigidbody.AddForce(-rigidbody.velocity); //Cancel out existing forces except for Gravity and whatnot.
-	        rigidbody.AddForce((transform.forward * movespeed * gamepadLeftVerticalOffset * (movementScalar + movementBoostScalar) * strokeDelayScalar));
-			rigidbody.AddForce((transform.right * movespeed / 2 * gamepadLeftHorizontalOffset * (movementScalar + movementBoostScalar) * strokeDelayScalar));
+            //destination = transform.forward * movespeed;
+            if (advancedControlStyle)
+            {
+                rigidbody.AddForce(new Vector3(-rigidbody.velocity.x, 0, -rigidbody.velocity.z)); //Cancel out existing forces except for Gravity and whatnot.
+            } 
+                else
+            {
+                rigidbody.AddForce(-rigidbody.velocity); //Cancel out all forces.
+            } 
+            rigidbody.AddForce((transform.forward * movespeed * gamepadLeftVerticalOffset * (movementScalar + movementBoostScalar) * strokeDelayScalar));
+            rigidbody.AddForce((transform.right * movespeed / 2 * gamepadLeftHorizontalOffset * (movementScalar + movementBoostScalar) * strokeDelayScalar));
 
-			if (gamepadLeftVerticalOffset != 0 || gamepadLeftHorizontalOffset != 0) {didStroke = true;}
+            if (gamepadLeftVerticalOffset != 0 || gamepadLeftHorizontalOffset != 0)
+            {
+                didStroke = true;
+            }
 
-	        //transform.position = Vector3.MoveTowards(transform.position, transform.position + (transform.forward * movespeed * Input.GetAxis("Vertical")), movespeed); //Moves forward based on the vertical axis (Joystick left stick or Keyboard WS keys). - Moore
-	        //transform.position = Vector3.MoveTowards(transform.position, transform.position + (transform.right * movespeed / 2 * Input.GetAxis("Horizontal")), movespeed / 2); //Horizontal speed is half of forward movespeed.
-	        //The two above commands work, but they work around the physics system. They're good if we're using an object that doesn't need rigid bodies, but isn't going to work as well for TSHE. - Moore
+            //transform.position = Vector3.MoveTowards(transform.position, transform.position + (transform.forward * movespeed * Input.GetAxis("Vertical")), movespeed); //Moves forward based on the vertical axis (Joystick left stick or Keyboard WS keys). - Moore
+            //transform.position = Vector3.MoveTowards(transform.position, transform.position + (transform.right * movespeed / 2 * Input.GetAxis("Horizontal")), movespeed / 2); //Horizontal speed is half of forward movespeed.
+            //The two above commands work, but they work around the physics system. They're good if we're using an object that doesn't need rigid bodies, but isn't going to work as well for TSHE. - Moore
 
-	        //if (Input.GetButton("Jump")) {transform.position = Vector3.MoveTowards(transform.position, transform.position + (transform.up * movespeed / 2), movespeed / 2);} //Vertical speed is also halved. | Another older version that ignored rigidbody physics.
+            //if (Input.GetButton("Jump")) {transform.position = Vector3.MoveTowards(transform.position, transform.position + (transform.up * movespeed / 2), movespeed / 2);} //Vertical speed is also halved. | Another older version that ignored rigidbody physics.
 
-	        if (Input.GetButton("Jump"))
-	        {
-				rigidbody.AddForce((transform.up * movespeed * (movementScalar + movementBoostScalar)  * strokeDelayScalar));
-				didStroke = true;
-	        }
+            if (Input.GetButton("Jump"))
+            {
+                rigidbody.AddForce((transform.up * movespeed * (movementScalar + movementBoostScalar) * strokeDelayScalar));
+                didStroke = true;
+            }
 
-			if (didStroke) {ResetStrokeCooldown();}
-		}
+            if (didStroke)
+            {
+                ResetStrokeCooldown();
+            }
+        }
 
-		//TODO: Allow the player to attack. This doesn't matter if the player has used a stroke or not.
+        //Enforce a maximum speed.
+        if (rigidbody.velocity.magnitude > maxspeed)
+        {
+            rigidbody.velocity = rigidbody.velocity.normalized * maxspeed;
+        }
+
+        //TODO: Allow the player to attack. This doesn't matter if the player has used a stroke or not.
     }
 
     void GameOver()
@@ -283,20 +300,23 @@ public class PlayerController : MonoBehaviour
     #endregion Mutator methods
 
     #region Utility Methods.
-	protected bool CanStroke()
-	{
-		bool result = false;
-		if (strokeCooldown <= 0) {result = true;}
-		return result;
-	}
+    protected bool CanStroke()
+    {
+        bool result = false;
+        if (strokeCooldown <= 0)
+        {
+            result = true;
+        }
+        return result;
+    }
 
-	protected void ResetStrokeCooldown()
-	{
-		if (swimSound != null && swimSoundPlayer != null) 
-		{
-			swimSoundPlayer.PlayOneShot(swimSound, 1);
-		}
-		strokeCooldown = timeBetweenStrokes;
-	}
+    protected void ResetStrokeCooldown()
+    {
+        if (swimSound != null && swimSoundPlayer != null)
+        {
+            swimSoundPlayer.PlayOneShot(swimSound, 1);
+        }
+        strokeCooldown = timeBetweenStrokes;
+    }
     #endregion Utility Methods.
 }
