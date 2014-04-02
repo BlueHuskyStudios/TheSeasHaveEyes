@@ -5,7 +5,7 @@ public class PlayerController : MonoBehaviour
 {
 
 
-    //Property Instantiation.
+    #region Declarations
 
     //--Constants and other variables that shouldn't be changed during runtime in the final product.
     public float movespeed; //This is set in the inspector to determine the forward-movement speed of the character. - Moore
@@ -51,8 +51,9 @@ public class PlayerController : MonoBehaviour
 
 	//Declare delegates and events.
 	public static event System.Action<float> AddAirEvent; // - Moore
+    #endregion Declarations
 
-    //--START OF UNITY EVENT METHODS
+    #region Unity Event Methods.
 
     // Use this for initialization
     void Start()
@@ -130,24 +131,9 @@ public class PlayerController : MonoBehaviour
 
 
     }
+    #endregion Unity Event Methods.
 
-    /*
-	void OnTriggerEnter(Collider other)
-	{
-		score += 100;
-		air += 10;
-		Destroy(other.gameObject); //Again, probably not the best place to put this, but it should work for now. - Moore
-	}
-	*/
-
-	//--END OF UNITY EVENT METHODS.
-
-
-	//--START OF USER EVENT METHODS.
-
-
-	//--END OF USER EVENT METHODS.
-
+    #region Logic Methods.
     void DrawHUD()
     {
         //This method might be better suited for a general gamecontroller script instead of the Player, but for now it's easier to access the variables from here.
@@ -214,6 +200,8 @@ public class PlayerController : MonoBehaviour
 	        }
 
 	        //destination = transform.forward * movespeed;
+            //rigidbody.AddForce(new Vector3(-rigidbody.velocity.x, 0, -rigidbody.velocity.z)); //Cancel out existing forces except for Gravity and whatnot.
+            rigidbody.AddForce(-rigidbody.velocity); //Cancel out existing forces except for Gravity and whatnot.
 	        rigidbody.AddForce((transform.forward * movespeed * gamepadLeftVerticalOffset * (movementScalar + movementBoostScalar) * strokeDelayScalar));
 			rigidbody.AddForce((transform.right * movespeed / 2 * gamepadLeftHorizontalOffset * (movementScalar + movementBoostScalar) * strokeDelayScalar));
 
@@ -237,6 +225,27 @@ public class PlayerController : MonoBehaviour
 		//TODO: Allow the player to attack. This doesn't matter if the player has used a stroke or not.
     }
 
+    void GameOver()
+    {
+        //STUB
+        print("Oh noes, you Game Overed! Have some free HP.");
+        AddHealth(9999f);
+
+    }
+
+    #endregion Logic Methods
+
+    #region Mutator Methods
+    public void TakeDamage(float amount)
+    {
+        health -= amount;
+        if (health < 0)
+        {
+            health = 0;
+            GameOver();
+        }
+    }
+
     public void AddAir(float amount)
     {
         air += amount;
@@ -245,18 +254,35 @@ public class PlayerController : MonoBehaviour
             air = airMax;
         }
     }
-
+    
     public void AddAirMax(float amount)
     {
         airMax += amount;
         AddAir(amount);
     }
 
+    public void AddHealth(float amount)
+    {
+        health += amount;
+        if (health > healthMax)
+        {
+            health = healthMax;
+        }
+    }
+    
+    public void AddHealthMax(float amount)
+    {
+        healthMax += amount;
+        AddHealth(amount);
+    }
+
     public void AddScore(float amount)
     {
         score += amount;
     }
+    #endregion Mutator methods
 
+    #region Utility Methods.
 	protected bool CanStroke()
 	{
 		bool result = false;
@@ -272,4 +298,5 @@ public class PlayerController : MonoBehaviour
 		}
 		strokeCooldown = timeBetweenStrokes;
 	}
+    #endregion Utility Methods.
 }

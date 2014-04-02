@@ -9,6 +9,7 @@ public class GameController : MonoBehaviour
     //State Machine states.
     public enum PlayingStates
     {
+        Null,
         Playing,
         Paused,
         GameOver
@@ -21,7 +22,7 @@ public class GameController : MonoBehaviour
     void Start()
     {
         //By checking for null, this only assigns a default if it is not assigned in the inspector. - Moore
-        if (currentPlayingState == null)
+        if (currentPlayingState == PlayingStates.Null)
         {
             currentPlayingState = PlayingStates.Playing;
         }
