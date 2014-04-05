@@ -5,6 +5,8 @@ public class GameController : MonoBehaviour
 {
 
     //Property declarations.
+    public static bool Testing = true;
+    public static float DAMPING = 7.0f;
 
     //State Machine states.
     public enum PlayingStates

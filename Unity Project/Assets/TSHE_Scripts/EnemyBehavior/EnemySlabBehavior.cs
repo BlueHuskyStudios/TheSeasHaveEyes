@@ -24,7 +24,10 @@ public class EnemySlabBehavior : MonoBehaviour {
     
     void OnTriggerEnter(Collider other)
     {
-        print("Trigger Entered by: " + other.ToString());
+        if (GameController.Testing)
+        {
+            print("Trigger Entered by: " + other.ToString());
+        }
     }
     
     void OnTriggerStay(Collider other)
@@ -32,7 +35,10 @@ public class EnemySlabBehavior : MonoBehaviour {
         if (genericEnemy != null)
         {
         
-            print("Trigger Stay by: " + other.ToString());
+            if (GameController.Testing) 
+            {
+                print("Trigger Stay by: " + other.ToString());
+            }
             PlayerController playerController = other.transform.parent.GetComponent<PlayerController>();
             if (playerController != null && genericEnemy.attackCooldownTime <= 0)
             {
@@ -44,6 +50,15 @@ public class EnemySlabBehavior : MonoBehaviour {
     
     void OnTriggerExit(Collider other)
     {
-        print("Trigger Left by: " + other.ToString());
+        if (GameController.Testing)
+        {
+            print("Trigger Left by: " + other.ToString());
+        }
     }
+
+	#region Utility Methods
+
+
+	
+	#endregion Utility Methods
 }

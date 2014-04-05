@@ -39,4 +39,35 @@ public class EnemyGenericBehavior : MonoBehaviour
     }
     */
 
+	#region Utility Methods
+	
+    //Casts a ray. If the ray hits a player, then return true. Else, return false.
+	public bool IsFacingPlayer()
+	{
+        bool result = false;
+
+        RaycastHit theHit;
+		if (Physics.Raycast(transform.position, transform.forward, out theHit))
+        {
+            /*if (theHit.collider) 
+            {*/
+                PlayerController thePlayer = theHit.transform.gameObject.GetComponent<PlayerController>();
+                if (thePlayer != null)
+                {
+                    result = true;
+                }
+            /*}*/
+        } 
+
+        return result;
+	}
+
+    public void SmoothLookAt(Vector3 target)
+    {
+        Quaternion rotation = Quaternion.LookRotation((new Vector3(target.x, transform.position.y, target.z) - transform.position));
+        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * GameController.DAMPING);
+    }
+	
+	#endregion Utility Methods
+
 }

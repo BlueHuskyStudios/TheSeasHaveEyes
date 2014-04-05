@@ -230,6 +230,7 @@ public class PlayerController : MonoBehaviour
             if (didStroke)
             {
                 ResetStrokeCooldown();
+                if (movementBoostScalar != 0) {strokeCooldown /= 2;} //Boost means twice as many strokes per unit time and twice the speed.
             }
         }
 
