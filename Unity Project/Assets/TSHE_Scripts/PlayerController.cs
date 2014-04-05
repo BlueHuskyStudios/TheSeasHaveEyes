@@ -1,6 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public enum ControlStyle
+{
+    Basic,
+    Normal,
+    Advanced
+}
+
 public class PlayerController : MonoBehaviour
 {
 
@@ -47,7 +54,7 @@ public class PlayerController : MonoBehaviour
 
 
     //Options and Configuration type thigies.
-    public bool advancedControlStyle = false;
+    public ControlStyle controlStyle = ControlStyle.Normal;
 
     //Declare delegates and events.
     public static event System.Action<float> AddAirEvent; // - Moore
@@ -186,7 +193,19 @@ public class PlayerController : MonoBehaviour
         gamepadRightHorizontalOffset = Input.GetAxis("RightHorizontal");
         gamepadRightVerticalOffset = Input.GetAxis("RightVertical");
 
-        if (CanStroke())
+        if (controlStyle == ControlStyle.Basic)
+        {
+            rigidbody.velocity = Vector3.zero;
+            rigidbody.AddForce((transform.forward * movespeed * gamepadLeftVerticalOffset * (movementScalar + movementBoostScalar) * strokeDelayScalar));
+            rigidbody.AddForce((transform.right * movespeed / 2 * gamepadLeftHorizontalOffset * (movementScalar + movementBoostScalar) * strokeDelayScalar));
+
+            if (Input.GetButton("Jump"))
+            {
+                rigidbody.AddForce((transform.up * movespeed * (movementScalar + movementBoostScalar) * strokeDelayScalar));
+            }
+        }
+
+       else if (CanStroke())
         {
             bool didStroke = false;
             gamepadTriggerOffset = Input.GetAxis("Trigger");
@@ -199,11 +218,11 @@ public class PlayerController : MonoBehaviour
             }
 
             //destination = transform.forward * movespeed;
-            if (advancedControlStyle)
+            if (controlStyle == ControlStyle.Advanced)
             {
                 rigidbody.AddForce(new Vector3(-rigidbody.velocity.x, 0, -rigidbody.velocity.z)); //Cancel out existing forces except for Gravity and whatnot.
             } 
-                else
+            else if (controlStyle == ControlStyle.Normal)
             {
                 rigidbody.AddForce(-rigidbody.velocity); //Cancel out all forces.
             } 
