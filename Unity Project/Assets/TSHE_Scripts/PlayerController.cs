@@ -58,6 +58,10 @@ public class PlayerController : MonoBehaviour
 
     //Declare delegates and events.
     public static event System.Action<float> AddAirEvent; // - Moore
+
+    //Values only for debugging and testing purposes.
+    public GameObject lookingAt;
+
     #endregion Declarations
 
     #region Unity Event Methods.
@@ -251,6 +255,8 @@ public class PlayerController : MonoBehaviour
                 ResetStrokeCooldown();
                 if (movementBoostScalar != 0) {strokeCooldown /= 2;} //Boost means twice as many strokes per unit time and twice the speed.
             }
+
+            IsLookingAt();
         }
 
         //Enforce a maximum speed.
@@ -338,5 +344,35 @@ public class PlayerController : MonoBehaviour
         }
         strokeCooldown = timeBetweenStrokes;
     }
+
+    //Casts a ray. If the ray hits a player, then return true. Else, return false.
+    public bool IsLookingAt(float distance)
+    {
+        bool result = false;
+        
+        RaycastHit theHit;
+        if (Physics.Raycast(transform.position, transform.forward, out theHit, distance))
+        {
+            GameObject theGameObject = theHit.collider.gameObject;
+            lookingAt = theGameObject;
+            if (theGameObject != null)
+            {
+                result = true;
+            }
+            if (GameController.Testing) 
+            {
+                //If we want the player to display testing data, here might be a spot.
+            }
+        } 
+        
+        return result;
+    }
+    
+    //Convenience method for the above: Just assumes a distance of 1k
+    public bool IsLookingAt()
+    {
+        return IsLookingAt(Mathf.Infinity);
+    }
+
     #endregion Utility Methods.
 }
