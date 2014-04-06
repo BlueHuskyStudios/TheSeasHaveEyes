@@ -8,8 +8,11 @@ using System.Collections;
 
 public class EnemyGenericBehavior : MonoBehaviour
 {
+    //Properties that should not change during runtime.
+    public float ContactDistance = 2f;
 
-    public float attackCooldownTime = 0.0f;
+    //Properties that will change frequently.
+    public float AttackCooldownTime = 0.0f;
 
     // Use this for initialization
     void Start()
@@ -20,9 +23,9 @@ public class EnemyGenericBehavior : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (attackCooldownTime > 0)
+        if (AttackCooldownTime > 0)
         {
-            attackCooldownTime -= Time.fixedDeltaTime;
+            AttackCooldownTime -= Time.fixedDeltaTime;
         }
     }
 
@@ -76,6 +79,7 @@ public class EnemyGenericBehavior : MonoBehaviour
         Quaternion rotation = Quaternion.LookRotation((new Vector3(target.x, target.y, target.z) - transform.position));
         transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * GameController.DAMPING);
     }
+   
 
 	#endregion Utility Methods
 

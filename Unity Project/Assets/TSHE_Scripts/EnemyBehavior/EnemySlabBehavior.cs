@@ -46,13 +46,13 @@ public class EnemySlabBehavior : MonoBehaviour {
                 print("Trigger Stay by: " + other.ToString());
             }
             PlayerController playerController = other.transform.parent.GetComponent<PlayerController>();
-            if (playerController != null && genericEnemy.attackCooldownTime <= 0)
+            if (playerController != null && genericEnemy.AttackCooldownTime <= 0)
             {
                 genericEnemy.SmoothLookAt(playerController.transform.position);
                 if (genericEnemy.IsFacingPlayer(attackRange))
                 {
                     playerController.TakeDamage(DAMAGE);
-                    genericEnemy.attackCooldownTime = attackRate; //Wait one second before able to attack again.
+                    genericEnemy.AttackCooldownTime = attackRate; //Wait one second before able to attack again.
                 }
             }
         }
@@ -67,31 +67,6 @@ public class EnemySlabBehavior : MonoBehaviour {
     }
 
 	#region Utility Methods
-
-    //I should move this into its own utility script class. - Moore
-    protected GameObject FindClosestGameObjectWithTag(string tagToFind)
-    {
-        GameObject result = null;
-        GameObject[] allObjects = GameObject.FindGameObjectsWithTag(tagToFind);
-        
-        foreach (GameObject current in allObjects)
-        {
-            if (current != this.gameObject)
-            {
-                if (result == null)
-                {
-                    result = current;
-                } else
-                {
-                    if (Vector3.Distance(transform.position, result.transform.position) > Vector3.Distance(transform.position, current.transform.position))
-                    {
-                        result = current;
-                    }
-                }
-            }
-        }
-        return result;
-    }
 	
 	#endregion Utility Methods
 }
