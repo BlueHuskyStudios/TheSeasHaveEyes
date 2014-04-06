@@ -1,10 +1,15 @@
-﻿using UnityEngine;
+﻿// Class Name: EnemySlabBehavior.cs
+// Class Purpose: Represents the enemy behaviors that are unique to a Slab. 
+// It expects the gameObject this MonoBehavior is attached to to also have an EnemyGenericBehavior attached to function, otherwise it will do very little.
+
+using UnityEngine;
 using System.Collections;
 
 public class EnemySlabBehavior : MonoBehaviour {
 
     const float DAMAGE = 1f;
     const float attackRange = 10f;
+	const float attackRate = 1.0f;
 
     protected EnemyGenericBehavior genericEnemy;
     
@@ -47,7 +52,7 @@ public class EnemySlabBehavior : MonoBehaviour {
                 if (genericEnemy.IsFacingPlayer(attackRange))
                 {
                     playerController.TakeDamage(DAMAGE);
-                    genericEnemy.attackCooldownTime = 1.0f; //Wait one second before able to attack again.
+                    genericEnemy.attackCooldownTime = attackRate; //Wait one second before able to attack again.
                 }
             }
         }

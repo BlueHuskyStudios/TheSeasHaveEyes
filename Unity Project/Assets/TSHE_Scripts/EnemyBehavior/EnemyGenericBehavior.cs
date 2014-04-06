@@ -1,4 +1,9 @@
-﻿using UnityEngine;
+﻿// Class Name: EnemyGenericBehavior.cs
+// Class Purpose: Represents the enemy behaviors that are common between all enemies in The Seas Have Eyes. 
+// While not very threatening on its own, it could still be potentially useful for creating special-case enemies that only use 
+// a few of the behaviors associated with an enemy, like having an attack cooldown or checking if it's facing the player.
+
+using UnityEngine;
 using System.Collections;
 
 public class EnemyGenericBehavior : MonoBehaviour

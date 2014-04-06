@@ -52,6 +52,8 @@ public class PlayerController : MonoBehaviour
     public float strokeCooldown; //This is used to track if the player's able to give another 'stroke' in the direction they're facing. - Moore
     public float timeBetweenStrokes; //Ideally, this would be a const, but is public to allow tweaking in the inspector. This is the cooldown is set to each stroke. - Moore
 
+    public float hurtEffectCountdown = 0f; //When the player takes damage, this is set to some value between 0 and 1 inclusive. 0 means 'don't show damage overlay'. 1 means 'do show it'. 
+
 
     //Options and Configuration type thigies.
     public ControlStyle controlStyle = ControlStyle.Normal;
@@ -69,16 +71,27 @@ public class PlayerController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        health = healthMax;
-        stamina = staminaMax;
-        air = airMax;
+        GameObject[] allObjects = GameObject.FindGameObjectsWithTag("Player");
+        if (allObjects.Length > 1)
+        {
+            print("WARNING: Attempted to add multiple players to game. Destroying a player...");
+            Destroy(gameObject);
+        } 
 
-        //And setting up event listener thingies here.
-        PickupBubble.CollidedWithPlayer += AddAir;
-        PickupBubble.CollidedWithPlayer += AddScore;
+        else
+        {
+            // Singleton pattern: We only want one player.  If the level starts with more than one, get rid of them.
+            health = healthMax;
+            stamina = staminaMax;
+            air = airMax;
 
-        timeBetweenStrokes = 1.0f;
-        strokeDelayScalar = timeBetweenStrokes * 15;
+            //And setting up event listener thingies here.
+            PickupBubble.CollidedWithPlayer += AddAir;
+            PickupBubble.CollidedWithPlayer += AddScore;
+
+            timeBetweenStrokes = 1.0f;
+            strokeDelayScalar = timeBetweenStrokes * 15;
+        }
     
     }
     
@@ -135,6 +148,7 @@ public class PlayerController : MonoBehaviour
 
     void OnGUI()
     {
+        hurtEffectCountdown = DrawRedOverlay(hurtEffectCountdown);
         DrawHUD();
         //gameObject.GetComponent<3DText>(); //Deleteme?
 
@@ -177,6 +191,35 @@ public class PlayerController : MonoBehaviour
         GUI.color = Color.white;
     }
 
+    float DrawRedOverlay(float alpha)
+    {
+        if (alpha > 1)
+        {
+            alpha = 1;
+        }
+
+        float result = alpha;
+
+        if (alpha > 0)
+        {
+
+
+            Color redShade = new Color(1, 0, 0, alpha);
+
+            // This bit, I had to look up, because I couldn't just set GUI.colors directly. It was more than a little annoying. - Moore.
+            Texture2D myTexture = new Texture2D(1,1);
+            myTexture.SetPixel(1,1,redShade);
+            myTexture.wrapMode = TextureWrapMode.Repeat;
+            myTexture.Apply();
+            //End of looked-up section.
+
+            GUI.Box(new Rect(0, 0, Screen.width, Screen.height), myTexture);
+            result -= Time.deltaTime;
+        }
+
+        return result;
+    }
+
     void HandlePlayerInput()
     {
 
@@ -207,9 +250,7 @@ public class PlayerController : MonoBehaviour
             {
                 rigidbody.AddForce((transform.up * movespeed * (movementScalar + movementBoostScalar) * strokeDelayScalar));
             }
-        }
-
-       else if (CanStroke())
+        } else if (CanStroke())
         {
             bool didStroke = false;
             gamepadTriggerOffset = Input.GetAxis("Trigger");
@@ -225,8 +266,7 @@ public class PlayerController : MonoBehaviour
             if (controlStyle == ControlStyle.Advanced)
             {
                 rigidbody.AddForce(new Vector3(-rigidbody.velocity.x, 0, -rigidbody.velocity.z)); //Cancel out existing forces except for Gravity and whatnot.
-            } 
-            else if (controlStyle == ControlStyle.Normal)
+            } else if (controlStyle == ControlStyle.Normal)
             {
                 rigidbody.AddForce(-rigidbody.velocity); //Cancel out all forces.
             } 
@@ -253,7 +293,10 @@ public class PlayerController : MonoBehaviour
             if (didStroke)
             {
                 ResetStrokeCooldown();
-                if (movementBoostScalar != 0) {strokeCooldown /= 2;} //Boost means twice as many strokes per unit time and twice the speed.
+                if (movementBoostScalar != 0)
+                {
+                    strokeCooldown /= 2;
+                } //Boost means twice as many strokes per unit time and twice the speed.
             }
 
             IsLookingAt();
@@ -287,6 +330,8 @@ public class PlayerController : MonoBehaviour
             health = 0;
             GameOver();
         }
+
+        hurtEffectCountdown = 1f;
     }
 
     public void AddAir(float amount)
@@ -359,7 +404,7 @@ public class PlayerController : MonoBehaviour
             {
                 result = true;
             }
-            if (GameController.Testing) 
+            if (GameController.Testing)
             {
                 //If we want the player to display testing data, here might be a spot.
             }
