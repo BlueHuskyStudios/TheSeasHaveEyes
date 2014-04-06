@@ -235,6 +235,27 @@ public class PlayerController : MonoBehaviour
         * Mouse right click - Attack? Or is attacking automatic? - Moore
         */
 
+        //Misc Options Section
+        if (Input.GetButtonDown("Fire2"))
+        {
+            //If the player just used Fire2 (Middleclick) change the movement control style to the next level up. This may be better suited to an on screen button or options menu.
+            switch (controlStyle)
+            {
+            case ControlStyle.Advanced:
+                controlStyle = ControlStyle.Basic;
+                break;
+            case ControlStyle.Basic:
+                controlStyle = ControlStyle.Normal;
+                break;
+            case ControlStyle.Normal:
+                controlStyle = ControlStyle.Advanced;
+                break;
+                
+            default:
+                break;
+            }
+        }
+
         //Movement Section
 
         gamepadLeftHorizontalOffset = Input.GetAxis("Horizontal");

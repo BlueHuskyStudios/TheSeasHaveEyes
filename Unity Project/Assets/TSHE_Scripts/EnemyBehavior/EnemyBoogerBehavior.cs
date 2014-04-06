@@ -46,7 +46,11 @@ public class EnemyBoogerBehavior : MonoBehaviour {
 			{
 				print("Trigger Stay by: " + other.ToString());
 			}
-			PlayerController playerController = other.transform.parent.GetComponent<PlayerController>();
+
+            PlayerController playerController;
+
+            //If the parent of the object we're colliding with is the player, Check to see if we are looking at eachother before dealing damage.
+			playerController = other.transform.parent.GetComponent<PlayerController>();
 			if (playerController != null && genericEnemy.attackCooldownTime <= 0)
 			{
 				genericEnemy.SmoothLookAt(playerController.transform.position);
@@ -56,6 +60,16 @@ public class EnemyBoogerBehavior : MonoBehaviour {
 					genericEnemy.attackCooldownTime = attackRate; //Wait one second before able to attack again.
 				}
 			}
+
+            //If the object we're colliding with is the player, immediately attempt to deal damage.
+            playerController = other.GetComponent<PlayerController>();
+            if (playerController != null && genericEnemy.attackCooldownTime <= 0)
+            {
+                genericEnemy.SmoothLookAt(playerController.transform.position);
+                playerController.TakeDamage(DAMAGE);
+                genericEnemy.attackCooldownTime = attackRate; //Wait one second before able to attack again.
+            }
+
 		}
 	}
 	

@@ -5,6 +5,17 @@ The Seas Have Eyes is a first-person arcade horror game developed by Blue Husky 
 
 *REMEMBER: When running in the preview window in Unity, use ctrl+p to start and stop, as the cursor will be locked.*
 
+*Controls*
+
+        * Keyboard WASD – Forward, Left strafe, Backward, Right strafe (respectively)
+        * Keyboard Shift – Boost (takes up stamina)
+		* Keyboard Space - Swim up. (Kinda like an infinite jump.)
+        * Keyboard Ctrl – Brake
+        * Mouse movement – Pitch, yaw
+        * Mouse left click – Forward
+        * Mouse right click - Attack
+		* Mouse middle click - Change Movement Style
+
 *Credits*
 * Programming: https://github.com/Supuhstar & https://github.com/Retl
 * Grahpical Assets: https://github.com/Supuhstar & https://github.com/Retl
