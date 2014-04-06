@@ -94,15 +94,23 @@ public class PlayerController : MonoBehaviour
         }
     
     }
+
+    void Update()
+    {
+        hurtEffectCountdown = UpdateCountdownMinMax(hurtEffectCountdown, 0f, 1f);
+
+        strokeCooldown -= Time.deltaTime;
+        air -= airLossRate * Time.deltaTime;
+    }
     
-    // FixedUpdate is called once per frame
+    // FixedUpdate is called reguarlly and is mainly used to deal with physics. For smoother, quicker changes, use Update.
     void FixedUpdate()
     {
-        strokeCooldown -= Time.fixedDeltaTime;
+
 
         HandlePlayerInput();
 
-        air -= airLossRate * Time.fixedDeltaTime;
+
         if (air < 0)
         {
             //If the player is out of air, then they rapidly lose health? Or instant game-over? - Moore
@@ -148,7 +156,7 @@ public class PlayerController : MonoBehaviour
 
     void OnGUI()
     {
-        hurtEffectCountdown = DrawRedOverlay(hurtEffectCountdown);
+        DrawRedOverlay(hurtEffectCountdown);
         DrawHUD();
         //gameObject.GetComponent<3DText>(); //Deleteme?
 
@@ -191,14 +199,12 @@ public class PlayerController : MonoBehaviour
         GUI.color = Color.white;
     }
 
-    float DrawRedOverlay(float alpha)
+    void DrawRedOverlay(float alpha)
     {
         if (alpha > 1)
         {
             alpha = 1;
         }
-
-        float result = alpha;
 
         if (alpha > 0)
         {
@@ -207,17 +213,14 @@ public class PlayerController : MonoBehaviour
             Color redShade = new Color(1, 0, 0, alpha);
 
             // This bit, I had to look up, because I couldn't just set GUI.colors directly. It was more than a little annoying. - Moore.
-            Texture2D myTexture = new Texture2D(1,1);
-            myTexture.SetPixel(1,1,redShade);
+            Texture2D myTexture = new Texture2D(1, 1);
+            myTexture.SetPixel(1, 1, redShade);
             myTexture.wrapMode = TextureWrapMode.Repeat;
             myTexture.Apply();
             //End of looked-up section.
 
-            GUI.Box(new Rect(0, 0, Screen.width, Screen.height), myTexture);
-            result -= Time.deltaTime;
+            GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), myTexture);
         }
-
-        return result;
     }
 
     void HandlePlayerInput()
@@ -315,7 +318,8 @@ public class PlayerController : MonoBehaviour
     {
         //STUB
         print("Oh noes, you Game Overed! Have some free HP.");
-        AddHealth(9999f);
+        Time.timeScale = 0f;
+        //AddHealth(9999f);
 
     }
 
@@ -417,6 +421,30 @@ public class PlayerController : MonoBehaviour
     public bool IsLookingAt()
     {
         return IsLookingAt(Mathf.Infinity);
+    }
+
+    //Usage: For accurate results, only call this once per Update per countdownVariable. - Moore
+    float UpdateCountdownMinMax(float countdown, float min, float max)
+    {
+        float result = countdown;
+
+        //Clamp to upper bounds.
+        if (countdown > max)
+        {
+            countdown = max;
+        }
+
+        //Clamp to lower bounds.
+        if (countdown < min)
+        {
+            countdown = min;
+        } 
+        //Decrement when not under bounds.
+        else if (countdown > min)
+        {
+            result -= Time.deltaTime;
+        }
+        return result;
     }
 
     #endregion Utility Methods.

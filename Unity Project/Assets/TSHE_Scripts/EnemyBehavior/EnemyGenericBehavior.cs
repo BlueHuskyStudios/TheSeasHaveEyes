@@ -73,7 +73,7 @@ public class EnemyGenericBehavior : MonoBehaviour
 
     public void SmoothLookAt(Vector3 target)
     {
-        Quaternion rotation = Quaternion.LookRotation((new Vector3(target.x, transform.position.y, target.z) - transform.position));
+        Quaternion rotation = Quaternion.LookRotation((new Vector3(target.x, target.y, target.z) - transform.position));
         transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * GameController.DAMPING);
     }
 
