@@ -22,9 +22,7 @@ public static class LibRevel
                 if (result == null)
                 {
                     result = current;
-                } 
-                
-                else
+                } else
                 {
                     //Only change if the newest object we're looking at is the closest.
                     if (Vector3.Distance(performer.transform.position, result.transform.position) > Vector3.Distance(performer.transform.position, current.transform.position))
@@ -60,7 +58,6 @@ public static class LibRevel
         return new Vector3(tempX, tempY, tempZ);
     }
 
-
     public static void FlyTowardsGameObject(GameObject performer, GameObject destination, float movementSpeed)
     {
         //Precondition: You should only be calling this once per caller per FixedUpdate. - Moore
@@ -78,13 +75,11 @@ public static class LibRevel
             { 
                 if (performer.rigidbody == null)
                 {
-                    performer.transform.position += (Vector3.MoveTowards(performer.transform.position, destination.transform.position, movementSpeed));
-                } 
-
-                else
+                    performer.transform.position = (Vector3.MoveTowards(performer.transform.position, destination.transform.position, 0.1f));
+                } else
                 {               
                     performer.rigidbody.freezeRotation = true;
-                    performer.rigidbody.AddForce(-performer.rigidbody.velocity);
+                    performer.rigidbody.velocity = Vector3.zero;
                     performer.rigidbody.AddForce(Vector3.MoveTowards(performer.transform.position, destination.transform.position, movementSpeed * Time.fixedDeltaTime));        
                 }       
             }

@@ -2,58 +2,55 @@
 // Class Purpose: Represents the enemy behaviors that are unique to a Stalk. 
 // It expects the gameObject this MonoBehavior is attached to to also have an EnemyGenericBehavior attached to function, otherwise it will do very little.
 // The main distinct thing about this one is that it has a much larger player detection range.
-
 using UnityEngine;
 using System.Collections;
 
-public class EnemyStalkBehavior : MonoBehaviour {
+public class EnemyStalkBehavior : MonoBehaviour
+{
 
-	
-	const float DAMAGE = 7f;
-	const float attackRange = 20f;
-	const float attackRate = 2.0f;
-    const float moveSpeed = 3.0f;
-
-
-	
-	protected EnemyGenericBehavior genericEnemy;
-	
-	// Use this for initialization
-	void Start()
-	{
-		genericEnemy = GetComponent<EnemyGenericBehavior>();
-	}
-	
-	// Update is called once per frame
-	void FixedUpdate()
-	{
-		if (genericEnemy != null)
-		{
-			GameObject thePlayer = LibRevel.FindClosestGameObjectWithTag(gameObject, "Player");
+    
+    const float DAMAGE = 7f;
+    const float attackRange = 20f;
+    const float attackRate = 2.0f;
+    const float moveSpeed = 2.0f;
+    protected EnemyGenericBehavior genericEnemy;
+    
+    // Use this for initialization
+    void Start()
+    {
+        genericEnemy = GetComponent<EnemyGenericBehavior>();
+    }
+    
+    // Update is called once per frame
+    void FixedUpdate()
+    {
+        if (genericEnemy != null)
+        {
+            GameObject thePlayer = LibRevel.FindClosestGameObjectWithTag(gameObject, "Player");
             if (LibRevel.IsWithinDistanceThreshold(gameObject, thePlayer, attackRange))
             {
                 LibRevel.FlyTowardsGameObject(gameObject, thePlayer, moveSpeed);
             }
-		}
-	}
-	
-	void OnTriggerEnter(Collider other)
-	{
-		if (GameController.Testing)
-		{
-			print("Trigger Entered by: " + other.ToString());
-		}
-	}
-	
-	void OnTriggerStay(Collider other)
-	{
-		if (genericEnemy != null)
-		{
-			
-			if (GameController.Testing) 
-			{
-				//print("Trigger Stay by: " + other.ToString());
-			}
+        }
+    }
+    
+    void OnTriggerEnter(Collider other)
+    {
+        if (GameController.Testing)
+        {
+            print("Trigger Entered by: " + other.ToString());
+        }
+    }
+    
+    void OnTriggerStay(Collider other)
+    {
+        if (genericEnemy != null)
+        {
+            
+            if (GameController.Testing)
+            {
+                //print("Trigger Stay by: " + other.ToString());
+            }
             
             PlayerController playerController; 
 
@@ -68,19 +65,19 @@ public class EnemyStalkBehavior : MonoBehaviour {
                     genericEnemy.AttackCooldownTime = attackRate; //Wait one second before able to attack again.
                 }
             }
-		}
-	}
-	
-	void OnTriggerExit(Collider other)
-	{
-		if (GameController.Testing)
-		{
-			print("Trigger Left by: " + other.ToString());
-		}
-	}
-	
-	#region Utility Methods
+        }
+    }
+    
+    void OnTriggerExit(Collider other)
+    {
+        if (GameController.Testing)
+        {
+            print("Trigger Left by: " + other.ToString());
+        }
+    }
+    
+    #region Utility Methods
 
-	
-	#endregion Utility Methods
+    
+    #endregion Utility Methods
 }
