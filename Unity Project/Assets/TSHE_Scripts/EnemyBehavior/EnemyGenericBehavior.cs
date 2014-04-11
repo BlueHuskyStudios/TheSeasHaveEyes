@@ -10,14 +10,17 @@ public class EnemyGenericBehavior : MonoBehaviour
 {
     //Properties that should not change during runtime.
     public float ContactDistance = 2f;
+    float attackRange = 5f;
+    public float attackRangeAdjusted; //This is public so that we can view it in the inspector. T
 
     //Properties that will change frequently.
     public float AttackCooldownTime = 0.0f;
+    public RaycastHit playerHitRay = new RaycastHit();
 
     // Use this for initialization
     void Start()
     {
-    
+        UpdateAttackRangeAdjustment(attackRange);
     }
     
     // Update is called once per frame
@@ -61,7 +64,13 @@ public class EnemyGenericBehavior : MonoBehaviour
             if (thePlayer != null)
             {
                 result = true;
-                if (GameController.Testing) {print("Enemy has spotted the player!");}
+                playerHitRay = theHit;
+
+                if (GameController.Testing) {print("Enemy has spotted the player! Ray Length: " + theHit.distance);}
+            }
+            else
+            {
+                playerHitRay = new RaycastHit();
             }
         } 
         
@@ -80,7 +89,14 @@ public class EnemyGenericBehavior : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * GameController.DAMPING);
     }
    
-
+    public void UpdateAttackRangeAdjustment(float newRange)
+    {
+        if (renderer != null)
+        {
+            attackRange = newRange;
+            attackRangeAdjusted = attackRange + renderer.bounds.size.z;
+        }
+    }
 	#endregion Utility Methods
 
 }

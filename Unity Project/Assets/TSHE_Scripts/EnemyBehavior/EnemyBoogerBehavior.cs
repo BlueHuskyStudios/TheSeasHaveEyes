@@ -18,6 +18,10 @@ public class EnemyBoogerBehavior : MonoBehaviour
     void Start()
     {
         genericEnemy = GetComponent<EnemyGenericBehavior>();
+        if (genericEnemy != null)
+        {
+            genericEnemy.UpdateAttackRangeAdjustment(attackRange);
+        }
     }
     
     // Update is called once per frame
@@ -60,8 +64,21 @@ public class EnemyBoogerBehavior : MonoBehaviour
                 genericEnemy.SmoothLookAt(playerController.transform.position);
                 if (genericEnemy.IsFacingPlayer(attackRange))
                 {
-                    playerController.TakeDamage(DAMAGE);
-                    genericEnemy.AttackCooldownTime = attackRate; //Wait one second before able to attack again.
+                    playerController.TakeDamage(DAMAGE * LibRevel.GetScalarFromDistanceThreshold(genericEnemy.playerHitRay.distance, genericEnemy.attackRangeAdjusted));
+                    if (GameController.Testing)
+                    {
+                        print(Vector3.Distance(transform.position, other.transform.position));
+                        print("Base Damage: " + DAMAGE);
+                        print("Distance from player: " + genericEnemy.playerHitRay.distance);
+                        print("Attack Range Adjusted: " + genericEnemy.attackRangeAdjusted);
+                        print("Distance / Attack Range Adjusted: " + (genericEnemy.playerHitRay.distance / genericEnemy.attackRangeAdjusted));
+                        print(" 1 - (Distance / Attack Range Adjusted): " + (1 - (genericEnemy.playerHitRay.distance / genericEnemy.attackRangeAdjusted)));
+                        
+                        print(LibRevel.GetScalarFromDistanceThreshold(genericEnemy.playerHitRay.distance, genericEnemy.attackRangeAdjusted));
+                        print(DAMAGE * LibRevel.GetScalarFromDistanceThreshold(genericEnemy.playerHitRay.distance, genericEnemy.attackRangeAdjusted));
+                        
+                    }
+                    genericEnemy.AttackCooldownTime = attackRate; //Reset the cooldown wait time.
                 }
             }
 
@@ -70,7 +87,7 @@ public class EnemyBoogerBehavior : MonoBehaviour
             if (playerController != null && genericEnemy.AttackCooldownTime <= 0)
             {
                 genericEnemy.SmoothLookAt(playerController.transform.position);
-                playerController.TakeDamage(DAMAGE);
+                playerController.TakeDamage(DAMAGE * LibRevel.GetScalarFromDistanceThreshold(transform.position, other.transform.position, attackRange));
                 genericEnemy.AttackCooldownTime = attackRate; //Wait a bit before able to attack again.
             }
         }

@@ -17,6 +17,11 @@ public class EnemySlabBehavior : MonoBehaviour {
     void Start()
     {
         genericEnemy = GetComponent<EnemyGenericBehavior>();
+        if (genericEnemy != null)
+        {
+            genericEnemy.UpdateAttackRangeAdjustment(attackRange);
+        }
+
     }
     
     // Update is called once per frame
@@ -51,7 +56,20 @@ public class EnemySlabBehavior : MonoBehaviour {
                 genericEnemy.SmoothLookAt(playerController.transform.position);
                 if (genericEnemy.IsFacingPlayer(attackRange))
                 {
-                    playerController.TakeDamage(DAMAGE);
+                    playerController.TakeDamage(DAMAGE * LibRevel.GetScalarFromDistanceThreshold(genericEnemy.playerHitRay.distance, genericEnemy.attackRangeAdjusted));
+                    if (GameController.Testing)
+                    {
+                        print (Vector3.Distance(transform.position, other.transform.position));
+                        print("Base Damage: " + DAMAGE);
+                        print("Distance from player: " + genericEnemy.playerHitRay.distance);
+                        print("Attack Range Adjusted: " + genericEnemy.attackRangeAdjusted);
+                        print("Distance / Attack Range Adjusted: " + (genericEnemy.playerHitRay.distance / genericEnemy.attackRangeAdjusted));
+                        print(" 1 - (Distance / Attack Range Adjusted): " + ( 1 - (genericEnemy.playerHitRay.distance / genericEnemy.attackRangeAdjusted)));
+
+                        print(LibRevel.GetScalarFromDistanceThreshold(genericEnemy.playerHitRay.distance, genericEnemy.attackRangeAdjusted));
+                        print(DAMAGE * LibRevel.GetScalarFromDistanceThreshold(genericEnemy.playerHitRay.distance, genericEnemy.attackRangeAdjusted));
+
+                    }
                     genericEnemy.AttackCooldownTime = attackRate; //Wait one second before able to attack again.
                 }
             }

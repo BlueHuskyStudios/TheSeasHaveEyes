@@ -107,4 +107,86 @@ public static class LibRevel
     {
         return !IsWithinDistanceThreshold(performer, destination, threshold);
     }
+
+    //Simplified version of the pair above that takes a pre-calculated distance.
+    public static bool IsWithinDistanceThreshold(float distance, float threshold)
+    {
+        bool result = false;
+        
+        if (distance > threshold)
+        { //If it is outside of the threshold...
+            result = false; //Return false. - Moore
+        } else
+        { // Otherwise, return true. - Moore
+            return true;
+        }
+        
+        return result;
+    }
+
+    //Convenience version of the above simplified method.
+    public static bool IsNotWithinDistanceThreshold(float distance, float threshold)
+    {
+        return !IsWithinDistanceThreshold(distance, threshold);
+    }
+
+    //Returns a value between 1 and 0 used to scale a value based on the relative distance threshold value. IF the distance is zero
+    public static float GetScalarFromDistanceThreshold(Vector3 performer, Vector3 destination, float threshold)
+    {
+        float result = 0;
+        
+        //Can't divide by zero. If the value will be zero, immediately give a result of zero.
+        if (threshold == 0)
+        {
+            result = 0;
+        } 
+        
+        else
+        {
+            //If the performer and destination are at the same spot, return 1.
+            //If the performer and destination were exactly at the border of the threshold, return zero.
+            result = 1.0f - (Vector3.Distance(performer, destination) / threshold);
+        }
+        
+        if (result < 0)
+        {
+            result = 0;
+        }
+        if (result > 0 && result < 1)
+        {
+            result = 1;
+        }
+        
+        return result;
+    }
+
+    //Returns a value between 1 and 0 used to scale a value based on the relative distance threshold value. IF the distance is zero
+    public static float GetScalarFromDistanceThreshold(float distance, float threshold)
+    {
+        float result = 0;
+        
+        //Can't divide by zero. If the value will be zero, immediately give a result of zero.
+        if (threshold == 0)
+        {
+            result = 0;
+        } 
+        
+        else
+        {
+            //If the performer and destination are at the same spot, return 1.
+            //If the performer and destination were exactly at the border of the threshold, return zero.
+            result = 1.0f - (distance / threshold);
+        }
+        
+        if (result < 0)
+        {
+            result = 0;
+        }
+        if (result > 0 && result < 1)
+        {
+            result = 1;
+        }
+        
+        return result;
+    }
 }
