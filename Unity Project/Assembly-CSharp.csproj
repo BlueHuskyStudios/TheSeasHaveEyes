@@ -46,7 +46,12 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\TSHE_Scripts\EnemyBehavior\EnemyBoogerBehavior.cs" />
+     <Compile Include="Assets\TSHE_Scripts\EnemyBehavior\EnemyGenericBehavior.cs" />
+     <Compile Include="Assets\TSHE_Scripts\EnemyBehavior\EnemySlabBehavior.cs" />
+     <Compile Include="Assets\TSHE_Scripts\EnemyBehavior\EnemyStalkBehavior.cs" />
      <Compile Include="Assets\TSHE_Scripts\GameController.cs" />
+     <Compile Include="Assets\TSHE_Scripts\LibRevel.cs" />
      <Compile Include="Assets\TSHE_Scripts\PickupBubble.cs" />
      <Compile Include="Assets\TSHE_Scripts\PlayerController.cs" />
      <None Include="Assets\Standard Assets\Projectors\Guidelines.txt" />
