@@ -1,4 +1,4 @@
-TheSeasHaveEyes
+﻿TheSeasHaveEyes
 ===============
 
 The Seas Have Eyes is a first-person arcade horror game developed by Blue Husky Studios.
@@ -19,6 +19,7 @@ The Seas Have Eyes is a first-person arcade horror game developed by Blue Husky 
 *Credits*
 * Programming: https://github.com/Supuhstar & https://github.com/Retl
 * Grahpical Assets: https://github.com/Supuhstar & https://github.com/Retl
+** Slime Green material from Blender Open Material Repository: http://matrep.parastudios.de/index.php?action=view&material=169-slime-green&fc=16
 * Sound Effects come from a variety of places such as http://www.freesound.org/people/wjoojoo/sounds/197751/ and http://soundbible.com/ and are used according to the Creative Commons Attribution 3.0 License and Creative Commons 0 License. You can read more about these licenses here: http://creativecommons.org/licenses/by/3.0/us/ http://creativecommons.org/publicdomain/zero/1.0/
 ** Underwater Pool sound: http://soundbible.com/1660-Underwater-Pool.html
 ** Large Bubble sound: http://soundbible.com/1345-Large-Bubble.html
